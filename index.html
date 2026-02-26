@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mesclador de Arquivos TXT</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background-color: #f4f4f9;
+            margin: 0;
+        }
+        #drop-zone {
+            width: 80%;
+            max-width: 600px;
+            height: 200px;
+            border: 2px dashed #007bff;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            color: #007bff;
+            background: white;
+            transition: background 0.3s;
+            cursor: pointer;
+            margin-bottom: 20px;
+        }
+        #drop-zone.hover {
+            background: #e7f1ff;
+            border-color: #0056b3;
+        }
+        #file-list {
+            width: 80%;
+            max-width: 600px;
+            margin-bottom: 20px;
+            max-height: 150px;
+            overflow-y: auto;
+            background: #fff;
+            padding: 10px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        button {
+            padding: 10px 25px;
+            font-size: 16px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        button:hover {
+            background-color: #218838;
+        }
+        button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Juntar Arquivos .txt</h1>
+    
+    <div id="drop-zone">
+        Arraste seus arquivos .txt aqui <br> ou clique para selecionar
+    </div>
+
+    <input type="file" id="file-input" multiple accept=".txt" style="display: none;">
+
+    <div id="file-list">Nenhum arquivo selecionado.</div>
+
+    <button id="download-btn" disabled>Juntar e Baixar Arquivo Único</button>
+
+    <script>
+        const dropZone = document.getElementById('drop-zone');
+        const fileInput = document.getElementById('file-input');
+        const fileList = document.getElementById('file-list');
+        const downloadBtn = document.getElementById('download-btn');
+
+        let selectedFiles = [];
+
+        // Clique para abrir seletor
+        dropZone.addEventListener('click', () => fileInput.click());
+
+        // Eventos de Drag & Drop
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.classList.add('hover');
+        });
+
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.classList.remove('hover');
+        });
+
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('hover');
+            handleFiles(e.dataTransfer.files);
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            handleFiles(e.target.files);
+        });
+
+        function handleFiles(files) {
+            const newFiles = Array.from(files).filter(file => file.type === "text/plain" || file.name.endsWith('.txt'));
+            
+            if (newFiles.length === 0) {
+                alert("Por favor, selecione apenas arquivos .txt");
+                return;
+            }
+
+            selectedFiles = [...selectedFiles, ...newFiles];
+            updateUI();
+        }
+
+        function updateUI() {
+            if (selectedFiles.length > 0) {
+                fileList.innerHTML = "<strong>Arquivos selecionados:</strong><ul>" + 
+                    selectedFiles.map(f => `<li>${f.name}</li>`).join('') + "</ul>";
+                downloadBtn.disabled = false;
+            } else {
+                fileList.innerText = "Nenhum arquivo selecionado.";
+                downloadBtn.disabled = true;
+            }
+        }
+
+        downloadBtn.addEventListener('click', async () => {
+            let combinedContent = "";
+
+            for (const file of selectedFiles) {
+                const content = await file.text();
+                // Adiciona o conteúdo e garante que haja uma quebra de linha entre arquivos
+                combinedContent += content + (content.endsWith('\n') ? '' : '\n');
+            }
+
+            const blob = new Blob([combinedContent], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            
+            a.href = url;
+            a.download = "arquivo_combinado.txt";
+            document.body.appendChild(a);
+            a.click();
+            
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            // Opcional: Limpar lista após baixar
+            // selectedFiles = [];
+            // updateUI();
+        });
+    </script>
+</body>
+</html>
