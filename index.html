@@ -3,161 +3,616 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mesclador de Arquivos TXT</title>
+    <title>Mesclador de Arquivos TXT Pro</title>
     <style>
+        /* --- Variáveis de Tema (Material Design 3) --- */
+        :root {
+            --md-sys-color-background: #f7f9fc;
+            --md-sys-color-on-background: #191c20;
+            --md-sys-color-surface: #ffffff;
+            --md-sys-color-surface-container: #f0f4f9;
+            --md-sys-color-outline: #74777f;
+            --md-sys-color-primary: #005ac1;
+            --md-sys-color-on-primary: #ffffff;
+            --md-sys-color-primary-container: #d8e2ff;
+            --md-sys-color-error: #ba1a1a;
+            --md-sys-color-on-error: #ffffff;
+            --md-sys-color-shadow: rgba(0, 0, 0, 0.1);
+            --md-sys-color-drag-bg: #dce4ff;
+            
+            --border-radius-lg: 16px;
+            --border-radius-md: 12px;
+            --border-radius-sm: 8px;
+        }
+
+        [data-theme="dark"] {
+            --md-sys-color-background: #191c20;
+            --md-sys-color-on-background: #e1e2ec;
+            --md-sys-color-surface: #1e2229;
+            --md-sys-color-surface-container: #2d313a;
+            --md-sys-color-outline: #8e9199;
+            --md-sys-color-primary: #aec6ff;
+            --md-sys-color-on-primary: #002f65;
+            --md-sys-color-primary-container: #00458d;
+            --md-sys-color-error: #ffb4ab;
+            --md-sys-color-on-error: #690005;
+            --md-sys-color-shadow: rgba(0, 0, 0, 0.4);
+            --md-sys-color-drag-bg: #2d313a;
+        }
+
+        /* --- Reset & Base --- */
+        * { box-sizing: border-box; transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease; }
         body {
-            font-family: sans-serif;
+            font-family: 'Roboto', 'Segoe UI', sans-serif;
+            background-color: var(--md-sys-color-background);
+            color: var(--md-sys-color-on-background);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 24px;
+        }
+
+        /* --- Header --- */
+        header {
+            width: 100%;
+            max-width: 700px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+        h1 { margin: 0; font-weight: 400; font-size: 1.75rem; }
+
+        .icon-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 50%;
+            color: var(--md-sys-color-on-background);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .icon-btn:hover { background-color: rgba(128,128,128, 0.1); }
+        .icon-btn svg { width: 24px; height: 24px; fill: currentColor; }
+
+        /* --- Drop Zone --- */
+        #drop-zone {
+            background-color: var(--md-sys-color-surface-container);
+            border: 2px dashed var(--md-sys-color-outline);
+            border-radius: var(--border-radius-lg);
+            padding: 48px 24px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            width: 100%;
+            max-width: 700px;
+            margin-bottom: 24px;
+        }
+        #drop-zone:hover, #drop-zone.drag-over {
+            background-color: var(--md-sys-color-drag-bg);
+            border-color: var(--md-sys-color-primary);
+            border-style: solid;
+        }
+        #drop-zone svg { width: 48px; height: 48px; fill: var(--md-sys-color-outline); margin-bottom: 12px; }
+        #drop-zone p { margin: 0; font-size: 1rem; color: var(--md-sys-color-outline); }
+        #drop-zone strong { color: var(--md-sys-color-primary); }
+
+        /* --- File List Container --- */
+        #file-list-wrapper {
+            background-color: var(--md-sys-color-surface);
+            border-radius: var(--border-radius-lg);
+            box-shadow: 0 4px 8px var(--md-sys-color-shadow);
+            width: 100%;
+            max-width: 700px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* List Header Toolbar */
+        .list-toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--md-sys-color-outline);
+            background-color: var(--md-sys-color-surface);
+        }
+        .list-title { font-weight: 500; font-size: 0.95rem; }
+        .sort-controls { display: flex; gap: 4px; }
+        
+        /* Sort Buttons */
+        .sort-btn {
+            background: transparent;
+            border: 1px solid transparent;
+            border-radius: var(--border-radius-sm);
+            cursor: pointer;
+            padding: 6px;
+            color: var(--md-sys-color-outline);
+            display: flex;
+            align-items: center;
+        }
+        .sort-btn:hover { background-color: var(--md-sys-color-surface-container); color: var(--md-sys-color-on-background); }
+        .sort-btn svg { width: 20px; height: 20px; fill: currentColor; }
+
+        /* Options Row (Separator Toggle) */
+        .options-row {
+            padding: 10px 16px;
+            background-color: var(--md-sys-color-surface-container);
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            border-bottom: 1px solid var(--md-sys-color-outline);
+            font-size: 0.9rem;
+            color: var(--md-sys-color-on-background);
+        }
+        
+        /* Toggle Switch CSS */
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 40px;
+            height: 24px;
+            margin-right: 10px;
+        }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 24px;
+        }
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        input:checked + .slider { background-color: var(--md-sys-color-primary); }
+        input:checked + .slider:before { transform: translateX(16px); }
+
+        /* List */
+        #file-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            max-height: 400px;
+            overflow-y: auto;
+            min-height: 150px;
+        }
+        
+        .empty-state {
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            height: 100vh;
-            background-color: #f4f4f9;
-            margin: 0;
+            height: 150px;
+            color: var(--md-sys-color-outline);
+            font-size: 0.9rem;
         }
-        #drop-zone {
-            width: 80%;
-            max-width: 600px;
-            height: 200px;
-            border: 2px dashed #007bff;
-            border-radius: 10px;
+
+        /* --- File Item --- */
+        .file-item {
             display: flex;
             align-items: center;
-            justify-content: center;
-            text-align: center;
-            color: #007bff;
-            background: white;
-            transition: background 0.3s;
-            cursor: pointer;
-            margin-bottom: 20px;
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--md-sys-color-surface-container);
+            cursor: grab;
+            background: var(--md-sys-color-surface);
+            user-select: none;
         }
-        #drop-zone.hover {
-            background: #e7f1ff;
-            border-color: #0056b3;
-        }
-        #file-list {
-            width: 80%;
-            max-width: 600px;
-            margin-bottom: 20px;
-            max-height: 150px;
-            overflow-y: auto;
-            background: #fff;
-            padding: 10px;
-            border-radius: 5px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
-        button {
-            padding: 10px 25px;
-            font-size: 16px;
-            background-color: #28a745;
-            color: white;
+        .file-item:last-child { border-bottom: none; }
+        .file-item:hover { background-color: var(--md-sys-color-surface-container); }
+        .file-item.dragging { opacity: 0.5; background: var(--md-sys-color-drag-bg); border: 1px dashed var(--md-sys-color-primary); }
+
+        .drag-handle { margin-right: 12px; color: var(--md-sys-color-outline); cursor: grab; }
+        .file-icon { margin-right: 12px; color: var(--md-sys-color-primary); }
+        
+        .file-info { flex-grow: 1; overflow: hidden; }
+        .file-name { font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 0.95rem; }
+        .file-meta { font-size: 0.75rem; color: var(--md-sys-color-outline); margin-top: 2px; }
+
+        .remove-btn {
+            background: none;
             border: none;
-            border-radius: 5px;
+            color: var(--md-sys-color-outline);
             cursor: pointer;
-            transition: background 0.2s;
+            padding: 8px;
+            border-radius: 50%;
+            margin-left: 8px;
         }
-        button:hover {
-            background-color: #218838;
+        .remove-btn:hover { background-color: #ffebee; color: var(--md-sys-color-error); }
+        [data-theme="dark"] .remove-btn:hover { background-color: #421214; color: #ffb4ab; }
+
+        /* --- Action Area --- */
+        .actions {
+            width: 100%;
+            max-width: 700px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 16px;
         }
-        button:disabled {
-            background-color: #ccc;
-            cursor: not-allowed;
+
+        .btn {
+            height: 40px;
+            padding: 0 24px;
+            border-radius: 20px;
+            font-family: inherit;
+            font-weight: 500;
+            font-size: 0.9rem;
+            cursor: pointer;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
         }
+        
+        .btn-primary {
+            background-color: var(--md-sys-color-primary);
+            color: var(--md-sys-color-on-primary);
+        }
+        .btn-primary:hover { opacity: 0.9; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+        .btn-primary:disabled { background-color: var(--md-sys-color-outline); color: var(--md-sys-color-surface); cursor: not-allowed; box-shadow: none; opacity: 0.5; }
+
+        .btn-tonal {
+            background-color: var(--md-sys-color-surface-container);
+            color: var(--md-sys-color-on-background);
+        }
+        .btn-tonal:hover { background-color: var(--md-sys-color-outline); opacity: 0.8; }
+
+        /* --- Toast Notification --- */
+        #toast {
+            visibility: hidden;
+            background-color: #323232;
+            color: #f2f2f2;
+            text-align: center;
+            border-radius: 4px;
+            padding: 12px 24px;
+            position: fixed;
+            z-index: 1000;
+            left: 50%;
+            bottom: 30px;
+            transform: translateX(-50%);
+            box-shadow: 0 3px 5px -1px rgba(0,0,0,.2), 0 6px 10px 0 rgba(0,0,0,.14), 0 1px 18px 0 rgba(0,0,0,.12);
+            opacity: 0;
+            transition: opacity 0.3s, bottom 0.3s;
+            font-size: 0.9rem;
+        }
+        #toast.show { visibility: visible; opacity: 1; bottom: 50px; }
+        #toast.error { background-color: var(--md-sys-color-error); color: var(--md-sys-color-on-error); }
+        #toast.success { background-color: var(--md-sys-color-primary); color: var(--md-sys-color-on-primary); }
+
     </style>
 </head>
 <body>
 
-    <h1>Juntar Arquivos .txt</h1>
-    
+    <header>
+        <h1>Mesclador de TXT</h1>
+        <button class="icon-btn" id="theme-toggle" aria-label="Alternar tema">
+            <!-- Ícone via JS -->
+        </button>
+    </header>
+
+    <!-- Área de Upload -->
     <div id="drop-zone">
-        Arraste seus arquivos .txt aqui <br> ou clique para selecionar
+        <svg viewBox="0 0 24 24"><path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM14 13v4h-4v-4H7l5-5 5 5h-3z"/></svg>
+        <p>Arraste arquivos <strong>.txt</strong> ou clique aqui</p>
+        <input type="file" id="file-input" multiple accept=".txt" style="display: none;">
     </div>
 
-    <input type="file" id="file-input" multiple accept=".txt" style="display: none;">
+    <!-- Lista de Arquivos -->
+    <div id="file-list-wrapper">
+        <!-- Toolbar -->
+        <div class="list-toolbar">
+            <span class="list-title">Arquivos (<span id="file-count">0</span>)</span>
+            <div class="sort-controls">
+                <button class="sort-btn" id="sort-asc" title="Ordem A-Z">
+                    <!-- Ícone Barras Crescentes -->
+                    <svg viewBox="0 0 24 24"><path d="M3 20h2v-4H3v4zm4 0h2V8H7v12zm4 0h2V4h-2v16zm4 0h2V12h-2v8z"/></svg>
+                </button>
+                <button class="sort-btn" id="sort-desc" title="Ordem Z-A">
+                    <!-- Ícone Barras Decrescentes -->
+                    <svg viewBox="0 0 24 24"><path d="M3 4h2v16H3V4zm4 8h2v8H7v-8zm4 4h2v4h-2v-4zm4-6h2v10h-2V6z"/></svg>
+                </button>
+            </div>
+        </div>
 
-    <div id="file-list">Nenhum arquivo selecionado.</div>
+        <!-- Opções -->
+        <div class="options-row">
+            <label class="switch">
+                <input type="checkbox" id="separator-toggle" checked>
+                <span class="slider"></span>
+            </label>
+            <span>Adicionar separadores entre arquivos</span>
+        </div>
 
-    <button id="download-btn" disabled>Juntar e Baixar Arquivo Único</button>
+        <ul id="file-list">
+            <div class="empty-state">
+                Nenhum arquivo selecionado
+            </div>
+        </ul>
+    </div>
+
+    <!-- Botões de Ação -->
+    <div class="actions">
+        <button id="clear-btn" class="btn btn-tonal" style="display: none;">
+            <svg style="width:18px;height:18px;fill:currentColor" viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
+            Limpar
+        </button>
+        <button id="merge-btn" class="btn btn-primary" disabled>
+            <svg style="width:18px;height:18px;fill:currentColor" viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
+            Juntar e Baixar
+        </button>
+    </div>
+
+    <!-- Notificações Toast -->
+    <div id="toast">Mensagem</div>
 
     <script>
+        // --- Ícones SVG (Paths) ---
+        const icons = {
+            sun: '<path d="M6.76 4.84l-1.8-1.79-1.41 1.41 1.79 1.79 1.42-1.41zM4 10.5H1v2h3v-2zm9-9.95h-2V3.5h2V.55zm7.45 3.91l-1.41-1.41-1.79 1.79 1.41 1.41 1.79-1.79zm-3.21 13.7l1.79 1.8 1.41-1.41-1.8-1.79-1.4 1.4zM20 10.5v2h3v-2h-3zm-8-5c-3.31 0-6 2.69-6 6s2.69 6 6 6 6-2.69 6-6-2.69-6-6-6zm-1 16.95h2V19.5h-2v2.95zm-7.45-3.91l1.41 1.41 1.79-1.8-1.41-1.41-1.79 1.8z"/>',
+            moon: '<path d="M10 2c-1.82 0-3.53.5-5 1.35C7.99 5.08 10 8.3 10 12s-2.01 6.92-5 8.65C6.47 21.5 8.18 22 10 22c5.52 0 10-4.48 10-10S15.52 2 10 2z"/>',
+            drag: '<path d="M11 18c0 1.1-.9 2-2 2s-2-.9-2-2 .9-2 2-2 2 .9 2 2zm-2-8c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0-6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm6 4c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/>',
+            textFile: '<path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/>',
+            close: '<path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>'
+        };
+
+        // --- Elementos do DOM ---
         const dropZone = document.getElementById('drop-zone');
         const fileInput = document.getElementById('file-input');
-        const fileList = document.getElementById('file-list');
-        const downloadBtn = document.getElementById('download-btn');
+        const fileListEl = document.getElementById('file-list');
+        const fileCountEl = document.getElementById('file-count');
+        const mergeBtn = document.getElementById('merge-btn');
+        const clearBtn = document.getElementById('clear-btn');
+        const themeToggle = document.getElementById('theme-toggle');
+        const sortAscBtn = document.getElementById('sort-asc');
+        const sortDescBtn = document.getElementById('sort-desc');
+        const separatorToggle = document.getElementById('separator-toggle');
+        const toastEl = document.getElementById('toast');
 
-        let selectedFiles = [];
+        // --- Estado ---
+        let filesData = [];
 
-        // Clique para abrir seletor
+        // --- Inicialização ---
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        document.documentElement.setAttribute('data-theme', savedTheme);
+        updateThemeIcon(savedTheme);
+
+        themeToggle.addEventListener('click', toggleTheme);
         dropZone.addEventListener('click', () => fileInput.click());
-
-        // Eventos de Drag & Drop
-        dropZone.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            dropZone.classList.add('hover');
-        });
-
-        dropZone.addEventListener('dragleave', () => {
-            dropZone.classList.remove('hover');
-        });
-
+        
+        // Drag & Drop Zone
+        dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('drag-over'); });
+        dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
         dropZone.addEventListener('drop', (e) => {
             e.preventDefault();
-            dropZone.classList.remove('hover');
+            dropZone.classList.remove('drag-over');
             handleFiles(e.dataTransfer.files);
         });
-
+        
         fileInput.addEventListener('change', (e) => {
             handleFiles(e.target.files);
+            fileInput.value = '';
         });
 
+        // --- Funções de Tema ---
+        function toggleTheme() {
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+            document.documentElement.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            updateThemeIcon(newTheme);
+        }
+
+        function updateThemeIcon(theme) {
+            themeToggle.innerHTML = `<svg viewBox="0 0 24 24">${theme === 'light' ? icons.moon : icons.sun}</svg>`;
+        }
+
+        // --- Gerenciamento de Arquivos ---
         function handleFiles(files) {
-            const newFiles = Array.from(files).filter(file => file.type === "text/plain" || file.name.endsWith('.txt'));
-            
-            if (newFiles.length === 0) {
-                alert("Por favor, selecione apenas arquivos .txt");
+            let addedCount = 0;
+            const newFiles = Array.from(files);
+
+            newFiles.forEach(file => {
+                if (file.type === "text/plain" || file.name.toLowerCase().endsWith('.txt')) {
+                    filesData.push({
+                        id: Date.now() + Math.random().toString(36).substr(2, 9),
+                        file: file
+                    });
+                    addedCount++;
+                }
+            });
+
+            if (addedCount > 0) {
+                showToast(`${addedCount} arquivo(s) adicionado(s).`, 'success');
+                renderList();
+            } else if (newFiles.length > 0) {
+                showToast('Apenas arquivos .txt são permitidos.', 'error');
+            }
+        }
+
+        // --- Ordenação ---
+        sortAscBtn.addEventListener('click', () => {
+            filesData.sort((a, b) => a.file.name.localeCompare(b.file.name));
+            renderList();
+            showToast('Ordenado A-Z', 'success');
+        });
+
+        sortDescBtn.addEventListener('click', () => {
+            filesData.sort((a, b) => b.file.name.localeCompare(a.file.name));
+            renderList();
+            showToast('Ordenado Z-A', 'success');
+        });
+
+        // --- Renderização ---
+        function renderList() {
+            fileListEl.innerHTML = '';
+            fileCountEl.textContent = filesData.length;
+
+            if (filesData.length === 0) {
+                fileListEl.innerHTML = '<div class="empty-state">Nenhum arquivo selecionado</div>';
+                mergeBtn.disabled = true;
+                clearBtn.style.display = 'none';
                 return;
             }
 
-            selectedFiles = [...selectedFiles, ...newFiles];
-            updateUI();
+            mergeBtn.disabled = false;
+            clearBtn.style.display = 'inline-flex';
+
+            filesData.forEach((item, index) => {
+                const li = document.createElement('li');
+                li.className = 'file-item';
+                li.draggable = true;
+                li.dataset.index = index;
+                li.dataset.id = item.id;
+
+                const sizeKB = (item.file.size / 1024).toFixed(1) + ' KB';
+
+                li.innerHTML = `
+                    <span class="drag-handle" title="Arraste para reordenar">
+                        <svg viewBox="0 0 24 24" style="width:20px;height:20px;fill:currentColor">${icons.drag}</svg>
+                    </span>
+                    <span class="file-icon">
+                        <svg viewBox="0 0 24 24" style="width:24px;height:24px;fill:currentColor">${icons.textFile}</svg>
+                    </span>
+                    <div class="file-info">
+                        <div class="file-name" title="${item.file.name}">${item.file.name}</div>
+                        <div class="file-meta">${sizeKB}</div>
+                    </div>
+                    <button class="remove-btn" onclick="removeFile('${item.id}')" title="Remover">
+                        <svg viewBox="0 0 24 24" style="width:20px;height:20px;fill:currentColor">${icons.close}</svg>
+                    </button>
+                `;
+
+                addDragEvents(li);
+                fileListEl.appendChild(li);
+            });
         }
 
-        function updateUI() {
-            if (selectedFiles.length > 0) {
-                fileList.innerHTML = "<strong>Arquivos selecionados:</strong><ul>" + 
-                    selectedFiles.map(f => `<li>${f.name}</li>`).join('') + "</ul>";
-                downloadBtn.disabled = false;
-            } else {
-                fileList.innerText = "Nenhum arquivo selecionado.";
-                downloadBtn.disabled = true;
+        window.removeFile = function(id) {
+            filesData = filesData.filter(item => item.id !== id);
+            renderList();
+        };
+
+        clearBtn.addEventListener('click', () => {
+            if(filesData.length > 0) {
+                filesData = [];
+                renderList();
+                showToast('Lista limpa.', 'success');
             }
-        }
-
-        downloadBtn.addEventListener('click', async () => {
-            let combinedContent = "";
-
-            for (const file of selectedFiles) {
-                const content = await file.text();
-                // Adiciona o conteúdo e garante que haja uma quebra de linha entre arquivos
-                combinedContent += content + (content.endsWith('\n') ? '' : '\n');
-            }
-
-            const blob = new Blob([combinedContent], { type: 'text/plain' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            
-            a.href = url;
-            a.download = "arquivo_combinado.txt";
-            document.body.appendChild(a);
-            a.click();
-            
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-            
-            // Opcional: Limpar lista após baixar
-            // selectedFiles = [];
-            // updateUI();
         });
+
+        // --- Drag & Drop Sort Logic ---
+        let dragStartIndex;
+
+        function addDragEvents(item) {
+            item.addEventListener('dragstart', dragStart);
+            item.addEventListener('dragover', dragOver);
+            item.addEventListener('drop', dragDrop);
+            item.addEventListener('dragenter', dragEnter);
+            item.addEventListener('dragleave', dragLeave);
+        }
+
+        function dragStart() {
+            dragStartIndex = +this.closest('li').dataset.index;
+            this.classList.add('dragging');
+        }
+
+        function dragOver(e) { e.preventDefault(); }
+
+        function dragEnter() { this.classList.add('over'); }
+        function dragLeave() { this.classList.remove('over'); }
+
+        function dragDrop() {
+            const dragEndIndex = +this.closest('li').dataset.index;
+            swapItems(dragStartIndex, dragEndIndex);
+            this.classList.remove('over');
+            document.querySelectorAll('.file-item').forEach(i => i.classList.remove('dragging'));
+        }
+
+        function swapItems(fromIndex, toIndex) {
+            const itemOne = filesData[fromIndex];
+            filesData.splice(fromIndex, 1);
+            filesData.splice(toIndex, 0, itemOne);
+            renderList();
+        }
+
+        // --- Merge Logic ---
+        mergeBtn.addEventListener('click', async () => {
+            if (filesData.length === 0) return;
+
+            const useSeparator = separatorToggle.checked; // Verifica estado do toggle
+
+            mergeBtn.innerHTML = `<span style="animation:spin 1s linear infinite;">⟳</span> Processando...`;
+            mergeBtn.disabled = true;
+            
+            // Keyframe para spinner inline
+            if (!document.getElementById('spin-style')) {
+                const style = document.createElement('style');
+                style.id = 'spin-style';
+                style.innerHTML = `@keyframes spin { 100% { transform: rotate(360deg); } }`;
+                document.head.appendChild(style);
+            }
+
+            try {
+                let combinedContent = "";
+                for (const item of filesData) {
+                    const content = await item.file.text();
+                    
+                    // Lógica baseada no Toggle
+                    if (useSeparator) {
+                        combinedContent += `========== ${item.file.name} ==========\n`;
+                        combinedContent += content + "\n\n";
+                    } else {
+                        // Apenas junta o conteúdo, mantendo a quebra de linha existente ou adicionando espaçamento simples
+                        combinedContent += content + "\n";
+                    }
+                }
+
+                const blob = new Blob([combinedContent], { type: 'text/plain;charset=utf-8' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `mesclado_${new Date().toISOString().slice(0,10)}.txt`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+
+                showToast('Download iniciado!', 'success');
+            } catch (error) {
+                console.error(error);
+                showToast('Erro ao processar arquivos.', 'error');
+            } finally {
+                // Reset button text after short delay
+                setTimeout(() => {
+                    mergeBtn.innerHTML = `<svg style="width:18px;height:18px;fill:currentColor" viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg> Juntar e Baixar`;
+                    mergeBtn.disabled = false;
+                }, 500);
+            }
+        });
+
+        // --- Toast ---
+        function showToast(msg, type = 'default') {
+            toastEl.textContent = msg;
+            toastEl.className = '';
+            toastEl.classList.add(type, 'show');
+            setTimeout(() => toastEl.classList.remove('show'), 3000);
+        }
     </script>
 </body>
 </html>
