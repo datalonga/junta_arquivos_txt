@@ -223,15 +223,21 @@
         .file-name { font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 0.95rem; }
         .file-meta { font-size: 0.75rem; color: var(--md-sys-color-outline); margin-top: 2px; }
 
-        .remove-btn {
+        .file-actions { display: flex; gap: 4px; }
+        
+        .action-btn {
             background: none;
             border: none;
             color: var(--md-sys-color-outline);
             cursor: pointer;
             padding: 8px;
             border-radius: 50%;
-            margin-left: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
+        .action-btn:hover { background-color: var(--md-sys-color-surface-container); color: var(--md-sys-color-primary); }
+        .action-btn.preview-btn:hover { color: var(--md-sys-color-primary); }
         .remove-btn:hover { background-color: #ffebee; color: var(--md-sys-color-error); }
         [data-theme="dark"] .remove-btn:hover { background-color: #421214; color: #ffb4ab; }
 
@@ -243,6 +249,7 @@
             justify-content: space-between;
             align-items: center;
             margin-top: 16px;
+            gap: 12px;
         }
 
         .btn {
@@ -256,8 +263,10 @@
             border: none;
             display: inline-flex;
             align-items: center;
+            justify-content: center;
             gap: 8px;
             box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+            white-space: nowrap;
         }
         
         .btn-primary {
@@ -272,6 +281,131 @@
             color: var(--md-sys-color-on-background);
         }
         .btn-tonal:hover { background-color: var(--md-sys-color-outline); opacity: 0.8; }
+        
+        .btn-outline {
+            background-color: transparent;
+            border: 1px solid var(--md-sys-color-outline);
+            color: var(--md-sys-color-on-background);
+        }
+        .btn-outline:hover { background-color: var(--md-sys-color-surface-container); }
+
+        /* --- Modal de Prévia --- */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            animation: fadeIn 0.2s ease;
+        }
+        .modal-overlay.active { display: flex; }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        @keyframes slideIn {
+            from { transform: translateY(-20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .modal {
+            background-color: var(--md-sys-color-surface);
+            border-radius: var(--border-radius-lg);
+            box-shadow: 0 8px 24px var(--md-sys-color-shadow);
+            width: 100%;
+            max-width: 800px;
+            max-height: 85vh;
+            display: flex;
+            flex-direction: column;
+            animation: slideIn 0.3s ease;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--md-sys-color-outline);
+            flex-shrink: 0;
+        }
+        .modal-title {
+            font-weight: 500;
+            font-size: 1.1rem;
+            margin: 0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 70%;
+        }
+        .modal-close {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 50%;
+            color: var(--md-sys-color-outline);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal-close:hover { background-color: var(--md-sys-color-surface-container); color: var(--md-sys-color-on-background); }
+
+        .modal-body {
+            padding: 16px 20px;
+            overflow-y: auto;
+            flex-grow: 1;
+            min-height: 200px;
+        }
+        
+        .preview-content {
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 0.85rem;
+            line-height: 1.5;
+            white-space: pre-wrap;
+            word-break: break-word;
+            color: var(--md-sys-color-on-background);
+            background-color: var(--md-sys-color-surface-container);
+            padding: 16px;
+            border-radius: var(--border-radius-md);
+            max-height: 55vh;
+            overflow-y: auto;
+            border: 1px solid var(--md-sys-color-outline);
+        }
+        .preview-empty {
+            color: var(--md-sys-color-outline);
+            font-style: italic;
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .modal-footer {
+            padding: 12px 20px;
+            border-top: 1px solid var(--md-sys-color-outline);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 8px;
+            flex-shrink: 0;
+            flex-wrap: wrap;
+        }
+        
+        .modal-info {
+            font-size: 0.8rem;
+            color: var(--md-sys-color-outline);
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 8px;
+        }
 
         /* --- Toast Notification --- */
         #toast {
@@ -294,6 +428,31 @@
         #toast.show { visibility: visible; opacity: 1; bottom: 50px; }
         #toast.error { background-color: var(--md-sys-color-error); color: var(--md-sys-color-on-error); }
         #toast.success { background-color: var(--md-sys-color-primary); color: var(--md-sys-color-on-primary); }
+
+        /* --- Loading Spinner --- */
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--md-sys-color-outline);
+            border-top-color: var(--md-sys-color-primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+            vertical-align: middle;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        
+        .btn .spinner { margin-right: 8px; }
+
+        /* --- Copy Button Animation --- */
+        @keyframes copySuccess {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); background-color: var(--md-sys-color-primary); }
+            100% { transform: scale(1); }
+        }
+        .btn-copy.success {
+            animation: copySuccess 0.3s ease;
+        }
 
     </style>
 </head>
@@ -364,10 +523,61 @@
             <svg style="width:18px;height:18px;fill:currentColor" viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
             Limpar
         </button>
+        <button id="preview-final-btn" class="btn btn-outline" disabled>
+            <svg style="width:18px;height:18px;fill:currentColor" viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>
+            Prévia do Resultado
+        </button>
         <button id="merge-btn" class="btn btn-primary" disabled>
             <svg style="width:18px;height:18px;fill:currentColor" viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
             Juntar e Baixar
         </button>
+    </div>
+
+    <!-- Modal de Prévia de Arquivo Individual -->
+    <div class="modal-overlay" id="preview-modal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title" id="modal-filename">arquivo.txt</h3>
+                <button class="modal-close" id="modal-close" aria-label="Fechar">
+                    <svg viewBox="0 0 24 24" style="width:20px;height:20px;fill:currentColor">
+                        <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="modal-body">
+                <pre class="preview-content" id="preview-content">Carregando...</pre>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-tonal" id="modal-cancel">Fechar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Prévia do Resultado Final -->
+    <div class="modal-overlay" id="preview-final-modal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">📄 Prévia do Arquivo Final</h3>
+                <button class="modal-close" id="preview-final-close" aria-label="Fechar">
+                    <svg viewBox="0 0 24 24" style="width:20px;height:20px;fill:currentColor">
+                        <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="modal-body">
+                <pre class="preview-content" id="preview-final-content">Gerando prévia...</pre>
+            </div>
+            <div class="modal-footer">
+                <span class="modal-info" id="preview-final-info"></span>
+                <div class="modal-actions">
+                    <button class="btn btn-tonal" id="preview-final-cancel">Fechar</button>
+                    <button class="btn btn-primary" id="preview-final-copy">
+                        <svg style="width:18px;height:18px;fill:currentColor" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>
+                        Copiar Texto
+                    </button>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- Notificações Toast -->
@@ -380,7 +590,9 @@
             moon: '<path d="M10 2c-1.82 0-3.53.5-5 1.35C7.99 5.08 10 8.3 10 12s-2.01 6.92-5 8.65C6.47 21.5 8.18 22 10 22c5.52 0 10-4.48 10-10S15.52 2 10 2z"/>',
             drag: '<path d="M11 18c0 1.1-.9 2-2 2s-2-.9-2-2 .9-2 2-2 2 .9 2 2zm-2-8c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0-6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm6 4c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/>',
             textFile: '<path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/>',
-            close: '<path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>'
+            close: '<path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>',
+            preview: '<path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>',
+            copy: '<path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>'
         };
 
         // --- Elementos do DOM ---
@@ -395,9 +607,28 @@
         const sortDescBtn = document.getElementById('sort-desc');
         const separatorToggle = document.getElementById('separator-toggle');
         const toastEl = document.getElementById('toast');
+        const previewFinalBtn = document.getElementById('preview-final-btn');
+        
+        // Modal Elements - File Preview
+        const previewModal = document.getElementById('preview-modal');
+        const modalFilename = document.getElementById('modal-filename');
+        const previewContent = document.getElementById('preview-content');
+        const modalClose = document.getElementById('modal-close');
+        const modalCancel = document.getElementById('modal-cancel');
+        
+        // Modal Elements - Final Preview
+        const previewFinalModal = document.getElementById('preview-final-modal');
+        const previewFinalContent = document.getElementById('preview-final-content');
+        const previewFinalClose = document.getElementById('preview-final-close');
+        const previewFinalCancel = document.getElementById('preview-final-cancel');
+        const previewFinalCopy = document.getElementById('preview-final-copy');
+        const previewFinalInfo = document.getElementById('preview-final-info');
 
         // --- Estado ---
         let filesData = [];
+        let previewCache = {};
+        let finalPreviewCache = null;
+        let finalPreviewSettings = null;
 
         // --- Inicialização ---
         const savedTheme = localStorage.getItem('theme') || 'light';
@@ -419,6 +650,154 @@
         fileInput.addEventListener('change', (e) => {
             handleFiles(e.target.files);
             fileInput.value = '';
+        });
+
+        // Toggle separator - invalidates final preview cache
+        separatorToggle.addEventListener('change', () => {
+            finalPreviewCache = null;
+            finalPreviewSettings = null;
+        });
+
+        // --- Modal Functions ---
+        function openModal(filename, content) {
+            modalFilename.textContent = filename;
+            
+            if (content === null) {
+                previewContent.innerHTML = '<div class="spinner"></div>';
+                previewContent.classList.add('preview-empty');
+            } else if (content.trim() === '') {
+                previewContent.textContent = '⚠️ Arquivo vazio';
+                previewContent.classList.add('preview-empty');
+            } else {
+                const limitedContent = content.length > 5000 
+                    ? content.substring(0, 5000) + '\n\n... [prévia limitada a 5000 caracteres]' 
+                    : content;
+                previewContent.textContent = limitedContent;
+                previewContent.classList.remove('preview-empty');
+            }
+            
+            previewModal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal() {
+            previewModal.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        modalClose.addEventListener('click', closeModal);
+        modalCancel.addEventListener('click', closeModal);
+        previewModal.addEventListener('click', (e) => { if (e.target === previewModal) closeModal(); });
+
+        // --- Final Preview Modal Functions ---
+        async function openFinalPreviewModal() {
+            if (filesData.length === 0) return;
+            
+            previewFinalModal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+            previewFinalContent.textContent = 'Gerando prévia...';
+            previewFinalContent.classList.add('preview-empty');
+            previewFinalInfo.textContent = '';
+            previewFinalCopy.disabled = true;
+            
+            const useSeparator = separatorToggle.checked;
+            const cacheKey = `${useSeparator}-${filesData.map(f => f.id).join('|')}`;
+            
+            // Verifica cache
+            if (finalPreviewCache && finalPreviewSettings === cacheKey) {
+                displayFinalPreview(finalPreviewCache, useSeparator);
+                return;
+            }
+            
+            try {
+                let combinedContent = "";
+                let totalChars = 0;
+                
+                for (const item of filesData) {
+                    const content = await item.file.text();
+                    
+                    if (useSeparator) {
+                        combinedContent += `========== ${item.file.name} ==========\n`;
+                        combinedContent += content + "\n\n";
+                    } else {
+                        combinedContent += content + "\n";
+                    }
+                    totalChars += content.length;
+                }
+                
+                // Salva no cache
+                finalPreviewCache = combinedContent;
+                finalPreviewSettings = cacheKey;
+                
+                displayFinalPreview(combinedContent, useSeparator, totalChars);
+                
+            } catch (error) {
+                console.error('Erro ao gerar prévia:', error);
+                previewFinalContent.textContent = '❌ Erro ao gerar a prévia do arquivo final.';
+                previewFinalContent.classList.add('preview-empty');
+                showToast('Erro ao gerar prévia.', 'error');
+            }
+        }
+
+        function displayFinalPreview(content, useSeparator, totalChars = null) {
+            // Limita a prévia para performance (mas mantém botão de copiar com conteúdo completo)
+            const displayLimit = 10000;
+            if (content.length > displayLimit) {
+                previewFinalContent.textContent = content.substring(0, displayLimit) + '\n\n... [prévia limitada a 10.000 caracteres - use "Copiar Texto" para o conteúdo completo]';
+            } else {
+                previewFinalContent.textContent = content;
+            }
+            previewFinalContent.classList.remove('preview-empty');
+            
+            // Info sobre o conteúdo
+            const charCount = content.length.toLocaleString('pt-BR');
+            const lineCount = content.split('\n').length.toLocaleString('pt-BR');
+            const separatorInfo = useSeparator ? ' ✅ com separadores' : ' ❌ sem separadores';
+            previewFinalInfo.textContent = `${charCount} caracteres • ${lineCount} linhas${separatorInfo}`;
+            
+            previewFinalCopy.disabled = false;
+        }
+
+        function closeFinalPreviewModal() {
+            previewFinalModal.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        previewFinalClose.addEventListener('click', closeFinalPreviewModal);
+        previewFinalCancel.addEventListener('click', closeFinalPreviewModal);
+        previewFinalModal.addEventListener('click', (e) => { if (e.target === previewFinalModal) closeFinalPreviewModal(); });
+
+        // Copy to Clipboard
+        previewFinalCopy.addEventListener('click', async () => {
+            if (!finalPreviewCache) return;
+            
+            try {
+                await navigator.clipboard.writeText(finalPreviewCache);
+                
+                // Feedback visual
+                previewFinalCopy.classList.add('success');
+                const originalText = previewFinalCopy.innerHTML;
+                previewFinalCopy.innerHTML = `<svg style="width:18px;height:18px;fill:currentColor" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg> Copiado!`;
+                
+                showToast('Texto copiado para a área de transferência!', 'success');
+                
+                setTimeout(() => {
+                    previewFinalCopy.classList.remove('success');
+                    previewFinalCopy.innerHTML = `<svg style="width:18px;height:18px;fill:currentColor" viewBox="0 0 24 24">${icons.copy}</svg> Copiar Texto`;
+                }, 2000);
+                
+            } catch (err) {
+                console.error('Erro ao copiar:', err);
+                showToast('Erro ao copiar texto.', 'error');
+            }
+        });
+
+        // Fechar modais com ESC
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                if (previewModal.classList.contains('active')) closeModal();
+                if (previewFinalModal.classList.contains('active')) closeFinalPreviewModal();
+            }
         });
 
         // --- Funções de Tema ---
@@ -449,6 +828,12 @@
                 }
             });
 
+            // Invalida cache da prévia final quando novos arquivos são adicionados
+            if (addedCount > 0) {
+                finalPreviewCache = null;
+                finalPreviewSettings = null;
+            }
+
             if (addedCount > 0) {
                 showToast(`${addedCount} arquivo(s) adicionado(s).`, 'success');
                 renderList();
@@ -460,12 +845,16 @@
         // --- Ordenação ---
         sortAscBtn.addEventListener('click', () => {
             filesData.sort((a, b) => a.file.name.localeCompare(b.file.name));
+            finalPreviewCache = null;
+            finalPreviewSettings = null;
             renderList();
             showToast('Ordenado A-Z', 'success');
         });
 
         sortDescBtn.addEventListener('click', () => {
             filesData.sort((a, b) => b.file.name.localeCompare(a.file.name));
+            finalPreviewCache = null;
+            finalPreviewSettings = null;
             renderList();
             showToast('Ordenado Z-A', 'success');
         });
@@ -478,11 +867,13 @@
             if (filesData.length === 0) {
                 fileListEl.innerHTML = '<div class="empty-state">Nenhum arquivo selecionado</div>';
                 mergeBtn.disabled = true;
+                previewFinalBtn.disabled = true;
                 clearBtn.style.display = 'none';
                 return;
             }
 
             mergeBtn.disabled = false;
+            previewFinalBtn.disabled = false;
             clearBtn.style.display = 'inline-flex';
 
             filesData.forEach((item, index) => {
@@ -505,9 +896,14 @@
                         <div class="file-name" title="${item.file.name}">${item.file.name}</div>
                         <div class="file-meta">${sizeKB}</div>
                     </div>
-                    <button class="remove-btn" onclick="removeFile('${item.id}')" title="Remover">
-                        <svg viewBox="0 0 24 24" style="width:20px;height:20px;fill:currentColor">${icons.close}</svg>
-                    </button>
+                    <div class="file-actions">
+                        <button class="action-btn preview-btn" onclick="previewFile('${item.id}')" title="Prévia do conteúdo">
+                            <svg viewBox="0 0 24 24" style="width:20px;height:20px;fill:currentColor">${icons.preview}</svg>
+                        </button>
+                        <button class="action-btn remove-btn" onclick="removeFile('${item.id}')" title="Remover">
+                            <svg viewBox="0 0 24 24" style="width:20px;height:20px;fill:currentColor">${icons.close}</svg>
+                        </button>
+                    </div>
                 `;
 
                 addDragEvents(li);
@@ -515,7 +911,36 @@
             });
         }
 
+        // --- Prévia do Arquivo Individual ---
+        window.previewFile = async function(id) {
+            const item = filesData.find(f => f.id === id);
+            if (!item) return;
+
+            openModal(item.file.name, null);
+
+            try {
+                if (previewCache[id]) {
+                    openModal(item.file.name, previewCache[id]);
+                    return;
+                }
+
+                const content = await item.file.text();
+                previewCache[id] = content;
+                openModal(item.file.name, content);
+                
+            } catch (error) {
+                console.error('Erro ao ler arquivo:', error);
+                previewContent.textContent = '❌ Erro ao carregar o conteúdo do arquivo.';
+                previewContent.classList.add('preview-empty');
+                showToast('Erro ao ler arquivo.', 'error');
+            }
+        };
+
         window.removeFile = function(id) {
+            delete previewCache[id];
+            finalPreviewCache = null;
+            finalPreviewSettings = null;
+            
             filesData = filesData.filter(item => item.id !== id);
             renderList();
         };
@@ -523,6 +948,9 @@
         clearBtn.addEventListener('click', () => {
             if(filesData.length > 0) {
                 filesData = [];
+                previewCache = {};
+                finalPreviewCache = null;
+                finalPreviewSettings = null;
                 renderList();
                 showToast('Lista limpa.', 'success');
             }
@@ -545,7 +973,6 @@
         }
 
         function dragOver(e) { e.preventDefault(); }
-
         function dragEnter() { this.classList.add('over'); }
         function dragLeave() { this.classList.remove('over'); }
 
@@ -560,6 +987,8 @@
             const itemOne = filesData[fromIndex];
             filesData.splice(fromIndex, 1);
             filesData.splice(toIndex, 0, itemOne);
+            finalPreviewCache = null;
+            finalPreviewSettings = null;
             renderList();
         }
 
@@ -567,30 +996,21 @@
         mergeBtn.addEventListener('click', async () => {
             if (filesData.length === 0) return;
 
-            const useSeparator = separatorToggle.checked; // Verifica estado do toggle
+            const useSeparator = separatorToggle.checked;
 
-            mergeBtn.innerHTML = `<span style="animation:spin 1s linear infinite;">⟳</span> Processando...`;
+            mergeBtn.innerHTML = `<span class="spinner"></span> Processando...`;
             mergeBtn.disabled = true;
-            
-            // Keyframe para spinner inline
-            if (!document.getElementById('spin-style')) {
-                const style = document.createElement('style');
-                style.id = 'spin-style';
-                style.innerHTML = `@keyframes spin { 100% { transform: rotate(360deg); } }`;
-                document.head.appendChild(style);
-            }
+            previewFinalBtn.disabled = true;
 
             try {
                 let combinedContent = "";
                 for (const item of filesData) {
                     const content = await item.file.text();
                     
-                    // Lógica baseada no Toggle
                     if (useSeparator) {
                         combinedContent += `========== ${item.file.name} ==========\n`;
                         combinedContent += content + "\n\n";
                     } else {
-                        // Apenas junta o conteúdo, mantendo a quebra de linha existente ou adicionando espaçamento simples
                         combinedContent += content + "\n";
                     }
                 }
@@ -610,13 +1030,16 @@
                 console.error(error);
                 showToast('Erro ao processar arquivos.', 'error');
             } finally {
-                // Reset button text after short delay
                 setTimeout(() => {
                     mergeBtn.innerHTML = `<svg style="width:18px;height:18px;fill:currentColor" viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg> Juntar e Baixar`;
-                    mergeBtn.disabled = false;
+                    mergeBtn.disabled = filesData.length === 0;
+                    previewFinalBtn.disabled = filesData.length === 0;
                 }, 500);
             }
         });
+
+        // --- Final Preview Button ---
+        previewFinalBtn.addEventListener('click', openFinalPreviewModal);
 
         // --- Toast ---
         function showToast(msg, type = 'default') {
